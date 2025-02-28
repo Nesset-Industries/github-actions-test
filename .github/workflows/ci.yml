@@ -1,20 +1,20 @@
-name: Pass Variable Between Jobs
+name: Pass Variable Between Stages
 
 on: push
 
 jobs:
-  job1:
+  stage1:
     runs-on: ubuntu-latest
     outputs:
-      my_variable: ${{ steps.step1.outputs.my_variable }}
+      message: ${{ steps.set_var.outputs.result }}  # <-- Correct output reference
     steps:
-      - name: Set Output Variable
-        id: step1
-        run: echo "my_variable=Hello from Job 1" >> $GITHUB_OUTPUT
+      - name: Set Variable
+        id: set_var
+        run: echo "result=Hello from Stage 1" >> $GITHUB_OUTPUT  # <-- Correct output setting
 
-  job2:
+  stage2:
     runs-on: ubuntu-latest
-    needs: job1
+    needs: stage1
     steps:
-      - name: Use Output Variable
-        run: echo "Received: ${{ needs.job1.outputs.my_variable }}"
+      - name: Use Output from Stage 1
+        run: echo "Received: ${{ needs.stage1.outputs.message }}"  # <-- Correct reference
