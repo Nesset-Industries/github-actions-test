@@ -1,20 +1,20 @@
-name: CI Pipeline
+name: Pass Variable Between Jobs
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+on: push
 
 jobs:
-  build:
+  job1:
     runs-on: ubuntu-latest
-
+    outputs:
+      my_variable: ${{ steps.step1.outputs.my_variable }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Set Output Variable
+        id: step1
+        run: echo "my_variable=Hello from Job 1" >> $GITHUB_OUTPUT
 
-      - name: Say Hello
-        run: echo "Hello, build!"
+  job2:
+    runs-on: ubuntu-latest
+    needs: job1
+    steps:
+      - name: Use Output Variable
+        run: echo "Received: ${{ needs.job1.outputs.my_variable }}"
