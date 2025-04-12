@@ -10,11 +10,10 @@ permissions:
   id-token: write
   contents: read
 
-env: prod
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: prod
     steps:
       - name: Login to Azure using OIDC
         uses: azure/login@v1
