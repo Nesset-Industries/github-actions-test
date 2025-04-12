@@ -25,13 +25,13 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan
-        run: terraform plan
+        run: terraform plan -out=tfplan
 
-      - name: Save Terraform Plan
+      - name: Save Terraform Plan as artifact
         uses: actions/upload-artifact@v3
         with:
-            name: tfplan
-            path: tfplan    
+          name: tfplan
+          path: tfplan    
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
