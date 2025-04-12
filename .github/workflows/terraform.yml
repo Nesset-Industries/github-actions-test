@@ -30,7 +30,7 @@ jobs:
       - name: Save Terraform Plan as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: tfplan
+          name: terraform-plan
           path: tfplan    
 
       - name: Terraform Apply
@@ -53,7 +53,7 @@ jobs:
       - name: Download Terraform Plan artifact
         uses: actions/download-artifact@v3
         with:
-          name: tfplan
+          name: terraform-plan
           path: ./plan
 
       - name: Terraform Apply
