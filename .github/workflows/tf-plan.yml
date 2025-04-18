@@ -25,6 +25,9 @@ jobs:
         with:
           terraform_version: 'latest'
 
+      - name: Change working directory
+        run: cd terraform
+
       - name: Terraform Init
         run: terraform init
 
