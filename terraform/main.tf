@@ -1,7 +1,7 @@
 terraform {
   cloud {
-    organization = "Nesset Industries"
-    
+    organization = "thomas-nesset"
+
     workspaces {
       name = "github-actions-test"
     }
