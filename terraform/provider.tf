@@ -5,6 +5,7 @@ provider "azurerm" {
   tenant_id       = var.azure_tenant_id
   subscription_id = var.azure_subscription_id
 
+  use_oidc        = true
   use_cli         = false
   use_msi         = false
 }
