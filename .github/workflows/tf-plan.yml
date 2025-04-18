@@ -39,7 +39,10 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -no-color
+        run: |
+          terraform plan -no-color -out=tfplan.binary
+          terraform show -no-color tfplan.binary > tfplan.txt
+      
       
 
       - name: Post plan to PR
