@@ -21,6 +21,7 @@ permissions:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    environment: prod
 
     steps:
       - name: Checkout Code
