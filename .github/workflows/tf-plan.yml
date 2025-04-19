@@ -19,6 +19,7 @@ env:
 jobs:
   terraform-plan:
     runs-on: ubuntu-latest
+    environment: prod
 
     defaults:
       run:
