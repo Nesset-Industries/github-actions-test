@@ -15,11 +15,6 @@ terraform {
   }
 }
 
-# You would then define your Azure resources using the azurerm provider below this block
-provider "azurerm" {
-  features {}
-}
-
 # Your resource blocks (e.g., resource "azurerm_resource_group" "example" { ... }) go here
 
 resource "azurerm_resource_group" "example" {
