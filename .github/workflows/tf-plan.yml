@@ -1,44 +1,40 @@
-name: Terraform Azure Deployment
+name: Azure Terraform CI/CD
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
-    branches: 
+    branches:
       - main
 
-permissions:
-  contents: read
-  pull-requests: write
-
 env:
-  TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
-
-  ARM_azure_client_id: "${{ secrets.AZURE_CLIENT_ID }}"
-  ARM_azure_subscription_id: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-  ARM_azure_tenant_id: "${{ secrets.AZURE_TENANT_ID }}"
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_USE_OIDC: true # Required for OIDC authentication
 
 jobs:
-  terraform-plan:
+  terraform:
     runs-on: ubuntu-latest
-    environment: prod
-
-    defaults:
-      run:
-        working-directory: ./terraform
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - name: Set up Terraform
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 'latest'
+          terraform_version: latest # Or a specific version
 
-      - name: Export TF_VAR_ secrets
-        run: |
-          echo "TF_VAR_azure_client_id=${{ secrets.AZURE_CLIENT_ID }}" >> $GITHUB_ENV
-          echo "TF_VAR_azure_tenant_id=${{ secrets.AZURE_TENANT_ID }}" >> $GITHUB_ENV
-          echo "TF_VAR_azure_subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+      # This step is needed if you are using OIDC
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true # Optional: if you need Azure PowerShell later
 
       - name: Terraform Init
         run: terraform init
@@ -47,22 +43,25 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: |
-          terraform plan -no-color -out=tfplan.binary
-          terraform show -no-color tfplan.binary > tfplan.txt
+        run: terraform plan -out=tfplan.binary
 
-      - name: Post plan to PR
-        uses: actions/github-script@v7
+      - name: Upload Terraform Plan Artifact
+        uses: actions/upload-artifact@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const plan = fs.readFileSync('tfplan.txt', 'utf8');
-            const truncatedPlan = plan.length > 65000 ? plan.substring(0, 65000) + '\n...output truncated...' : plan;
+          name: terraform-plan
+          path: tfplan.binary
 
-            github.rest.issues.createComment({
-              issue_number: context.payload.pull_request.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `### 🧪 Terraform Plan Result\n\`\`\`\n${truncatedPlan}\n\`\`\``
-            });
+      - name: Terraform Apply (on push to main)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve tfplan.binary
+        env:
+          # These environment variables are needed by the AzureRM provider
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_USE_OIDC: true
+
+      # Optional: Add a step to output the plan in a readable format on Pull Requests
+      - name: Format Terraform Plan for PR
+        if: github.event_name == 'pull_request'
+        run: terraform show -no-color tfplan.binary >> $GITHUB_STEP_SUMMARY
