@@ -57,21 +57,54 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
-          path: tfplan.binary
+          path: ./terraform/tfplan.binary
 
+      - name: Format Terraform Plan for PR Comment
+        if: github.event_name == 'pull_request'
+        id: format_plan
+        working-directory: ./terraform
+        run: |
+          # Use terraform show to get human-readable output
+          # Use -no-color because comment formatting doesn't support ANSI colors well
+          PLAN_OUTPUT=$(terraform show -no-color tfplan.binary)
+
+          # Determine if there are changes
+          # terraform show on an empty plan will contain "No changes."
+          if echo "$PLAN_OUTPUT" | grep -q "No changes."; then
+            PLAN_SUMMARY="✨ No changes to infrastructure."
+            # Keep full output for completeness in the comment
+            PLAN_BODY="\`\`\`terraform\n$PLAN_OUTPUT\n\`\`\`"
+          else
+            PLAN_SUMMARY="⚠️ Terraform plan proposes changes."
+             # Keep full output for completeness in the comment
+            PLAN_BODY="\`\`\`terraform\n$PLAN_OUTPUT\n\`\`\`"
+          fi
+
+          # Create the full comment body with a header and the plan output
+          # Use a unique marker to allow the commenting action to find and update this comment
+          COMMENT_BODY="### Terraform Plan Results: \`${{ github.sha }}\`\n\n$PLAN_SUMMARY\n\n$PLAN_BODY\n\n<sub>:robot: This comment will be updated with new plans.</sub>"
+
+          # Save the comment body to a file
+          echo "$COMMENT_BODY" > tfplan_comment.md
+
+      - name: Create or Update PR Comment
+        if: github.event_name == 'pull_request' # Only run this on PRs
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }} 
+          body-path: ./terraform/tfplan_comment.md
+  
       - name: Terraform Apply (on push to main)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve tfplan.binary
         working-directory: ./terraform
-        env:
-          # These environment variables are needed by the AzureRM provider
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_USE_OIDC: true
-
-      # Optional: Add a step to output the plan in a readable format on Pull Requests
-      - name: Format Terraform Plan for PR
-        if: github.event_name == 'pull_request'
-        run: terraform show -no-color tfplan.binary >> $GITHUB_STEP_SUMMARY
+  
+      - name: Output Terraform Plan Summary
+        if: always() # Always run, even if previous steps failed
         working-directory: ./terraform
+        run: |
+          if [ -f tfplan.binary ]; then
+            terraform show -no-color tfplan.binary >> $GITHUB_STEP_SUMMARY
+          else
+            echo "tfplan.binary artifact not found. Plan step might have failed." >> $GITHUB_STEP_SUMMARY
+          fi
