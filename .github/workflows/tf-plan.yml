@@ -43,12 +43,15 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+        working-directory: ./terraform
 
       - name: Terraform Validate
         run: terraform validate
+        working-directory: ./terraform
 
       - name: Terraform Plan
         run: terraform plan -out=tfplan.binary
+        working-directory: ./terraform
 
       - name: Upload Terraform Plan Artifact
         uses: actions/upload-artifact@v4
@@ -59,6 +62,7 @@ jobs:
       - name: Terraform Apply (on push to main)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve tfplan.binary
+        working-directory: ./terraform
         env:
           # These environment variables are needed by the AzureRM provider
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -70,3 +74,4 @@ jobs:
       - name: Format Terraform Plan for PR
         if: github.event_name == 'pull_request'
         run: terraform show -no-color tfplan.binary >> $GITHUB_STEP_SUMMARY
+        working-directory: ./terraform
