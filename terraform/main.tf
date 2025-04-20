@@ -1,16 +1,15 @@
 terraform {
   required_providers {
     azurerm = {
-      source = "hashicorp/azurerm"
+      source  = "hashicorp/azurerm"
       version = "~> 4.0"
     }
   }
 
-  # Configure the azurerm backend
   backend "azurerm" {
     resource_group_name  = "rg-nesset-github-actions-test-state"
-    storage_account_name = "sagithubactionsteststate"      
-    container_name       = "sc-state"    
+    storage_account_name = "sagithubactionsteststate"
+    container_name       = "sc-state"
     key                  = "terraform.tfstate"
   }
 }
