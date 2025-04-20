@@ -1,0 +1,22 @@
+{
+  "users": [
+    {
+      "display_name": "John Doe",
+      "user_principal_name": "john.doe@nesset.com",
+      "mail_nickname": "johndoe",
+      "force_password_change": true,
+      "job_title": "Developer",
+      "department": "IT",
+      "usage_location": "US"
+    },
+    {
+      "display_name": "Jane Smith",
+      "user_principal_name": "jane.smith@nesset.com",
+      "mail_nickname": "janesmith",
+      "force_password_change": true,
+      "job_title": "Designer",
+      "department": "Marketing",
+      "usage_location": "UK"
+    }
+  ]
+}
