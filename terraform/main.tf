@@ -8,7 +8,10 @@ terraform {
 
   # Configure the azurerm backend
   backend "azurerm" {
-    resource_group_name  = "rg-nesset-github-actions-test-state"      
+    resource_group_name  = "rg-nesset-github-actions-test-state"
+    storage_account_name = "sagithubactionsteststate"      
+    container_name       = "sc-state"    
+    key                  = "terraform.tfstate"
   }
 }
 
