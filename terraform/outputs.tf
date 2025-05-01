@@ -1,9 +1,9 @@
-output "resource_group_name" {
-  description = "Name of the Resource Group"
-  value       = azurerm_resource_group.example.name
+# Output the website URL
+output "static_website_url" {
+  value = azurerm_storage_account.static_website.primary_web_endpoint
 }
 
-output "location" {
-  description = "Location of the Resource Group"
-  value       = azurerm_resource_group.example.location
+# Output the CDN URL
+output "cdn_endpoint_url" {
+  value = "https://${azurerm_cdn_endpoint.static_website.fqdn}"
 }

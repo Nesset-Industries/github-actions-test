@@ -1,9 +1,3 @@
-variable "example_resource_group_name" {
-  description = "Name of the Resource Group"
-  type        = string
-  default     = "example-rg"
-}
-
 variable "static_website_resource_group_name" {
   description = "Name of the Static Website Resource Group"
   type        = string
@@ -39,7 +33,6 @@ variable "tags" {
   type        = map(string)
   default     = {
     environment = "prod"
-    project     = "github-actions"
     managed_by  = "terraform"
   }
 }
