@@ -57,7 +57,7 @@ resource "azurerm_cdn_endpoint" "static_website" {
 
   origin {
     name      = "staticwebsite"
-    host_name = azurerm_storage_account.static_website.primary_web_endpoint
+    host_name = azurerm_storage_account.static_website.primary_web_host
   }
 
   tags = var.tags
