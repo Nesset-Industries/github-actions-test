@@ -116,6 +116,7 @@ jobs:
     needs: terraform
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    environment: prod
     
     steps:
       - name: Checkout Repository
