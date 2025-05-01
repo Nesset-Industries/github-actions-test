@@ -142,7 +142,7 @@ jobs:
             # Example: az storage blob upload-batch --account-name tnesastaticwebsite --destination '$web' --source 'dist'
             az storage blob upload-batch \
               --account-name tnesastaticwebsite \
-              --auth-mode login \
+              --auth-mode key \
               --destination '$web' \
               --source 'website'
       
