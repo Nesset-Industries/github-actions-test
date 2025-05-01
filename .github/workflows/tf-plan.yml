@@ -83,7 +83,8 @@ jobs:
 
           # Create the full comment body with a header and the plan output
           # Use a unique marker to allow the commenting action to find and update this comment
-          COMMENT_BODY="### Terraform Plan Results: \`${{ github.sha }}\`\n\n$PLAN_SUMMARY\n\n$PLAN_BODY\n\n<sub>:robot: This comment will be updated with new plans.</sub>"
+          COMMENT_BODY="### Terraform Plan Results: \`${{ github.sha }}\`\n\n  
+          $PLAN_SUMMARY\n\n$PLAN_BODY"
 
           # Save the comment body to a file
           echo "$COMMENT_BODY" > tfplan_comment.md
