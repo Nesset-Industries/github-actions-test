@@ -14,14 +14,10 @@ terraform {
   }
 }
 
-resource "azurerm_resource_group" "example" {
-  name     = var.example_resource_group_name
-  location = var.location
-}
-
 resource "azurerm_resource_group" "static_website" {
   name     = var.static_website_resource_group_name
   location = var.location
+  
 }
 
 resource "azurerm_storage_account" "static_website" {
@@ -32,12 +28,13 @@ resource "azurerm_storage_account" "static_website" {
   account_replication_type = "LRS"
   account_kind             = "StorageV2"
 
-  static_website {
-    index_document = "index.html"
-    error_404_document = "404.html"
-  }
-
   tags = var.tags
+}
+
+resource "azurerm_storage_account_static_website" "static_website" {
+  storage_account_id = azurerm_storage_account.static_website.id
+  index_document     = "index.html"
+  error_404_document = "404.html"
 }
 
 resource "azurerm_cdn_profile" "static_website" {
@@ -70,5 +67,5 @@ output "static_website_url" {
 
 # Output the CDN URL
 output "cdn_endpoint_url" {
-  value = "https://${azurerm_cdn_endpoint.static_website.host_name}"
+  value = "https://${azurerm_cdn_endpoint.static_website.fqdn}"
 }
